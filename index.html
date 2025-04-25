@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>পোস্ট কোড জেনারেটর - বস</title>
+  <style>
+    /* বসল, নিচে স্টাইলস লিখে দিলাম, একদম মার্জিত আর রেগে 😤👍 */
+    body {
+      font-family: 'Noto Sans Bengali', sans-serif;
+      background: #f4f4f4;
+      padding: 1rem;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 1rem;
+      display: block;
+    }
+    input, button {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      cursor: pointer;
+    }
+    .field-group {
+      margin-bottom: 1rem;
+    }
+    /* ইমেজ ট্যাগের স্টাইল, ইনপুট ছোট, ট্যাগগুলো মার্জিনসহ দেখাবে */
+    .img-tag-input {
+      width: auto;
+      display: inline-block;
+      padding: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .img-tags-container {
+      display: inline-block;
+      margin-top: 0.5rem;
+    }
+    .img-tag {
+      display: inline-block;
+      background: #e2e8f0;
+      color: #2d3748;
+      padding: 0.3rem 0.5rem;
+      margin: 0.2rem;
+      border-radius: 3px;
+      font-size: 0.9rem;
+    }
+    .img-tag span.remove-tag {
+      margin-left: 0.5rem;
+      color: #e74c3c;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    /* এড বাটন, কপি আর ডাউনলোড বাটন স্টাইলিং 😤 */
+    .btn {
+      background: linear-gradient(145deg, #60a5fa, #2563eb);
+      border: none;
+      color: #fff;
+      padding: 0.7rem;
+      font-size: 1rem;
+      border-radius: 12px;
+      margin-top: 1rem;
+      width: 100%;
+      transition: transform 0.2s ease;
+    }
+    .btn:hover {
+      transform: translateY(-3px);
+    }
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    /* রিচ টেক্সট এডিটরের স্টাইল, বোল্ড ও লিঙ্ক বাটন সহ 😡 */
+    .editor-toolbar {
+      margin-bottom: 0.5rem;
+    }
+    .editor-toolbar button {
+      padding: 0.3rem 0.7rem;
+      margin-right: 0.3rem;
+      background: #3498db;
+      border: none;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .editor {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      min-height: 150px;
+      padding: 0.5rem;
+      overflow-y: auto;
+    }
+    /* আউটপুট কোড এরিয়া 😎 */
+    #generatedCode {
+      background: #efefef;
+      padding: 1rem;
+      white-space: pre-wrap;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-top: 1rem;
+      height: 300px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>পোস্ট কোড জেনারেটর - বস, একদম চুল চের মত 😤🔥</h2>
+    <form id="postForm">
+      <div class="field-group">
+        <label>পোস্ট নাম্বার 🧐:</label>
+        <input type="number" id="postNumber" placeholder="উদাহরণ: 1" required>
+      </div>
+      <div class="field-group">
+        <label>তারিখ 📅:</label>
+        <input type="date" id="postDate" required>
+      </div>
+      <div class="field-group">
+        <label>টাইটেল 📝:</label>
+        <input type="text" id="postTitle" placeholder="উদাহরণ: আমার প্রথম দিন" required>
+      </div>
+      <div class="field-group">
+        <label>ইমেজের নাম 🖼️:</label>
+        <input type="text" id="imageInput" class="img-tag-input" placeholder="ইমেজের নাম (যেমন: ss.jpg)" onkeypress="if(event.key==='Enter'){ event.preventDefault(); addImageTag(); }">
+        <button type="button" class="btn" style="width:auto; margin-top:0.5rem;" onclick="addImageTag()">অ্যাড কর 🆕</button>
+        <div class="img-tags-container" id="imageTagsContainer"></div>
+      </div>
+      <div class="field-group">
+        <label>ডেস্ক্রিপশন 🗒️:</label>
+        <div class="editor-toolbar">
+          <button type="button" onclick="formatText('desc','bold')">বোল্ড</button>
+          <button type="button" onclick="addLink('desc')">লিঙ্ক</button>
+        </div>
+        <div id="postDescriptionEditor" class="editor" contenteditable="true" placeholder="ডেস্ক্রিপশন লিখো..." onkeypress="handleEnter(event)"></div>
+      </div>
+      <button type="submit" class="btn">জেনারেট কর 🚀</button>
+    </form>
+    <hr>
+    <h3>জেনারেট করা HTML কোড - কপি করে নিতে বস 😡👇</h3>
+    <pre id="generatedCode"></pre>
+    <div class="button-group">
+      <button type="button" class="btn" onclick="copyCode()">কপি কর 📋</button>
+      <button type="button" class="btn" onclick="downloadFile()">ডাউনলোড কর 💾</button>
+    </div>
+  </div>
+
+  <script>
+    // ইমেজ ট্যাগ অ্যাড করার ফাংশন (FIXED)
+    function addImageTag() {
+      const input = document.getElementById('imageInput');
+      const tagText = input.value.trim();
+      if (!tagText) return;
+      const container = document.getElementById('imageTagsContainer');
+      const tag = document.createElement('span');
+      tag.className = 'img-tag';
+      tag.dataset.src = tagText;  // এখানে ফাইলনেম ধরে রাখা হয়েছে
+      tag.innerHTML = tagText +
+        '<span class="remove-tag" onclick="this.parentElement.remove()"> ✖️</span>';
+      container.appendChild(tag);
+      input.value = "";
+    }
+
+    function formatText(editorId, command) {
+      let editor = (editorId === 'desc') ? document.getElementById('postDescriptionEditor') : null;
+      editor.focus();
+      document.execCommand(command, false, null);
+    }
+    function addLink(editorId) {
+      let url = prompt("লিঙ্ক URL লিখো:");
+      if (!url) return;
+      let editor = (editorId === 'desc') ? document.getElementById('postDescriptionEditor') : null;
+      editor.focus();
+      document.execCommand('createLink', false, url);
+    }
+    function handleEnter(event) {
+      if (event.key === 'Enter') {
+        document.execCommand('insertHTML', false, '<br><br>');
+        event.preventDefault();
+      }
+    }
+
+    document.getElementById('postForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const postNumber = document.getElementById('postNumber').value.trim();
+      const postDate = document.getElementById('postDate').value;
+      const postTitle = document.getElementById('postTitle').value.trim();
+      const postDescription = document.getElementById('postDescriptionEditor').innerHTML;
+
+      // data-src থেকে ফাইলনেমগুলো নিয়ে আসা
+      const tagEls = document.querySelectorAll('#imageTagsContainer .img-tag');
+      const images = Array.from(tagEls).map(tag => tag.dataset.src);
+
+      // জেনারেটেড HTML
+      let generatedHTML = `<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="date" content="${postDate}">
+  <title>${postTitle}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {          
+      font-family: 'Noto Sans Bengali', sans-serif;          
+      margin: 0;          
+      padding: 2rem;          
+      background: linear-gradient(120deg, #2d3b50, #1e293b);          
+      color: #e0f2fe;          
+      background-attachment: fixed;          
+      background-size: cover;          
+    }          
+    .date {          
+      position: absolute;          
+      top: 20px;          
+      right: 20px;          
+      background: rgba(0, 0, 0, 0.5);          
+      padding: 0.5rem 1rem;          
+      border-radius: 8px;          
+      font-weight: bold;          
+    }          
+    header {          
+      text-align: center;          
+      margin-bottom: 2rem;          
+    }          
+    h1 {          
+      font-size: 2.2rem;          
+      color: #38bdf8;          
+    }          
+    img {          
+      display: block;          
+      max-width: 100%;          
+      height: auto;          
+      border-radius: 12px;          
+      margin: 2rem auto;          
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);          
+    }          
+    p {          
+      font-size: 1.1rem;          
+      color: #d1d5db;          
+      line-height: 1.7;          
+      max-width: 700px;          
+      margin: auto;          
+      margin-bottom: 1.5rem;          
+      padding: 0 1rem;          
+      text-align: left;          
+    }          
+    .button-group {          
+      text-align: center;          
+      margin-top: 2rem;          
+    }          
+    .btn {          
+      background: linear-gradient(145deg, #60a5fa, #2563eb);          
+      border: none;          
+      color: white;          
+      padding: 0.7rem 1.5rem;          
+      margin: 0 1rem;          
+      font-size: 1rem;          
+      border-radius: 12px;          
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);          
+      cursor: pointer;          
+      transition: transform 0.2s ease;          
+    }          
+    .btn:hover {          
+      transform: translateY(-3px);          
+    }          
+    .comment-box {          
+      max-width: 600px;          
+      margin: 3rem auto;          
+      background: transparent;          
+      border: none;          
+      padding: 0;          
+    }          
+    .comment-box h3 {          
+      margin-top: 0;          
+      margin-bottom: 1rem;          
+      color: #7dd3fc;          
+      text-align: center;          
+    }          
+    .comment-input-group {          
+      display: flex;          
+      gap: 0.5rem;          
+    }          
+    .comment-box textarea {          
+      width: 100%;          
+      height: 35px;          
+      padding: 0.8rem;          
+      font-size: 1rem;          
+      border-radius: 10px;          
+      border: 2px solid #38bdf8;          
+      background: rgba(255, 255, 255, 0.1);          
+      color: #f1f5f9;          
+      resize: vertical;          
+      outline: none;          
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);          
+      flex: 1;          
+      transition: height 0.2s ease;          
+    }          
+    .comment-box textarea::placeholder {          
+      color: #cbd5e1;          
+    }          
+    .comment-box textarea:focus {          
+      height: 35px;          
+    }          
+    .send-button {          
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);          
+      border: none;          
+      border-radius: 10px;          
+      color: white;          
+      font-size: 1.4rem;          
+      font-weight: bold;          
+      cursor: pointer;          
+      padding: 0 1rem;          
+      transition: background 0.3s ease;          
+      display: flex;          
+      align-items: center;          
+      justify-content: center;          
+    }          
+    .send-button:hover {          
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);          
+    }          
+    footer {          
+      text-align: center;          
+      margin-top: 3rem;          
+      font-size: 1.2rem;          
+      color: #7dd3fc;          
+    }          
+  </style>
+</head>
+<body>
+  <div class="date">${postDate}</div>
+  <header><h1>${postTitle}</h1></header>
+`;
+
+      // ইমেজ প্রিভিউ (relative path)
+      if (images.length === 1) {
+        generatedHTML += `  <img src="./${images[0]}" alt="Screenshot">\n`;
+      } else if (images.length > 1) {
+        generatedHTML += `  <div class="gallery">\n`;
+        images.forEach((img, idx) => {
+          generatedHTML += `    <img src="./${img}" alt="ছবি ${idx + 1}">\n`;
+        });
+        generatedHTML += `  </div>\n`;
+      }
+
+      generatedHTML += `  <p>${postDescription}</p>
+  <div class="button-group">
+    <button class="btn" onclick="window.location.href='index.html'">হোম</button>
+    <button class="btn" onclick="sharePost()">শেয়ার করো</button>
+  </div>
+  <footer> DK Shuvo's Journey </footer>
+</body>
+</html>`;
+
+      document.getElementById('generatedCode').textContent = generatedHTML;
+    });
+
+    function copyCode() {
+      const code = document.getElementById('generatedCode').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('বস, কোড কপি হয়ে গেছে! 😊');
+      }).catch(() => {
+        alert('কপি করতে সমস্যা হয়েছে! 😤');
+      });
+    }
+
+    function downloadFile() {
+      const postNumber = document.getElementById('postNumber').value.trim() || 'post';
+      const code = document.getElementById('generatedCode').textContent;
+      const filename = `post-${postNumber}.html`;
+      const blob = new Blob([code], {type: "text/html"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      alert('ডাউনলোড শুরু হয়েছে, বস! 😎');
+    }
+  </script>
+</body>
+  </html>
